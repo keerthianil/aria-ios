@@ -1,18 +1,18 @@
 import SwiftUI
 
 enum ColorTokens {
-    static let brandPrimary = Color(red: 37/255, green: 99/255, blue: 235/255)
-    static let brandAccent = Color(red: 124/255, green: 58/255, blue: 237/255)
+    static let brandPrimary = Color("BrandPrimary")
+    static let brandAccent = Color("BrandAccent")
 
-    static let backgroundPrimary = Color(uiColor: .systemBackground)
-    static let backgroundSecondary = Color(uiColor: .secondarySystemBackground)
-    static let backgroundTertiary = Color(uiColor: .tertiarySystemBackground)
+    static let backgroundPrimary = Color(.systemBackground)
+    static let backgroundSecondary = Color(.secondarySystemBackground)
+    static let backgroundTertiary = Color(.tertiarySystemBackground)
 
-    static let textPrimary = Color(uiColor: .label)
-    static let textSecondary = Color(uiColor: .secondaryLabel)
-    static let textTertiary = Color(uiColor: .tertiaryLabel)
+    static let textPrimary = Color(.label)
+    static let textSecondary = Color(.secondaryLabel)
+    static let textTertiary = Color(.tertiaryLabel)
 
-    static let borderDefault = Color(uiColor: .separator)
+    static let borderDefault = Color(.separator)
 
     static let severityCritical = Color(red: 220/255, green: 38/255, blue: 38/255)
     static let severityMajor = Color(red: 234/255, green: 88/255, blue: 12/255)
