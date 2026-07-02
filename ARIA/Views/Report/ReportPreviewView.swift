@@ -2,13 +2,15 @@ import SwiftUI
 
 struct ReportPreviewView: View {
     let audit: Audit
+    @State private var pdfData: Data?
+    @State private var isGenerating = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.xl) {
                 reportHeader
                 severitySummary
-                ForEach(audit.screens.sorted(by: { $0.orderIndex < $1.orderIndex })) { screen in
+                ForEach(audit.sortedScreens) { screen in
                     screenSection(screen)
                 }
             }
@@ -18,23 +20,49 @@ struct ReportPreviewView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                ShareLink(item: generateReportText()) {
-                    Label("Share", systemImage: "square.and.arrow.up")
+                if let pdfData {
+                    let doc = PDFDocument(data: pdfData, filename: "\(audit.appName)-Audit-Report.pdf")
+                    ShareLink(item: doc, preview: SharePreview("\(audit.appName) — Audit Report", image: Image(systemName: "doc.text"))) {
+                        Label("Export PDF", systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel("Share PDF report")
+                } else {
+                    Button {
+                        generatePDF()
+                    } label: {
+                        Label("Generate PDF", systemImage: "doc.text")
+                    }
+                    .accessibilityLabel("Generate PDF report")
                 }
             }
         }
+        .onAppear { generatePDF() }
     }
+
+    // MARK: - Header
 
     private var reportHeader: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("Accessibility Audit Report")
                 .font(.title2.bold())
-            Text(audit.appName)
-                .font(Typography.title3)
-                .foregroundStyle(ColorTokens.textSecondary)
-            Text("Audit: \(audit.name)")
+
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: audit.platform.iconName)
+                Text(audit.appName)
+            }
+            .font(Typography.title3)
+            .foregroundStyle(ColorTokens.textSecondary)
+
+            Text(audit.name)
                 .font(Typography.subheadline)
                 .foregroundStyle(ColorTokens.textSecondary)
+
+            if !audit.auditorName.isEmpty {
+                Text("Auditor: \(audit.auditorName)")
+                    .font(Typography.caption)
+                    .foregroundStyle(ColorTokens.textTertiary)
+            }
+
             Text("Generated \(Date.now, format: .dateTime.month(.wide).day().year())")
                 .font(Typography.caption)
                 .foregroundStyle(ColorTokens.textTertiary)
@@ -43,55 +71,79 @@ struct ReportPreviewView: View {
         }
     }
 
+    // MARK: - Severity Summary
+
     private var severitySummary: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text("Summary")
                 .font(Typography.headline)
 
-            HStack(spacing: Spacing.lg) {
-                summaryBadge("Critical", count: audit.criticalCount, color: ColorTokens.severityCritical)
-                summaryBadge("Major", count: audit.majorCount, color: ColorTokens.severityMajor)
-                let minorCount = audit.screens.reduce(0) { $0 + $1.findings.filter { $0.severity == .minor }.count }
-                summaryBadge("Minor", count: minorCount, color: ColorTokens.severityMinor)
+            HStack(spacing: Spacing.md) {
+                ForEach(Severity.allCases) { sev in
+                    let count = audit.screens.reduce(0) { $0 + $1.findings.filter { $0.severity == sev }.count }
+                    summaryCard(sev.displayName, count: count, color: sev.color)
+                }
             }
         }
     }
 
-    private func summaryBadge(_ label: String, count: Int, color: Color) -> some View {
+    private func summaryCard(_ label: String, count: Int, color: Color) -> some View {
         VStack(spacing: 4) {
             Text("\(count)")
-                .font(Typography.display)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(color)
             Text(label)
-                .font(Typography.caption)
+                .font(Typography.caption2)
                 .foregroundStyle(ColorTokens.textSecondary)
         }
         .frame(maxWidth: .infinity)
         .padding(Spacing.md)
         .background(ColorTokens.backgroundSecondary)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(count) \(label)")
     }
+
+    // MARK: - Screen Sections
 
     private func screenSection(_ screen: AuditScreen) -> some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            Text(screen.name)
-                .font(Typography.headline)
-                .padding(.top, Spacing.sm)
+            HStack {
+                Text(screen.name)
+                    .font(Typography.headline)
+                Spacer()
+                Text("\(screen.findings.count) finding\(screen.findings.count == 1 ? "" : "s")")
+                    .font(Typography.caption)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+            .padding(.top, Spacing.sm)
 
-            ForEach(screen.findings.sorted(by: { $0.severity.sortOrder < $1.severity.sortOrder })) { finding in
-                findingRow(finding, screenName: screen.name)
+            ForEach(screen.sortedFindings) { finding in
+                findingRow(finding)
             }
         }
     }
 
-    private func findingRow(_ finding: Finding, screenName: String) -> some View {
+    private func findingRow(_ finding: Finding) -> some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack {
+            HStack(spacing: Spacing.sm) {
                 SeverityBadge(severity: finding.severity)
                 if !finding.wcagCriterionID.isEmpty {
                     Text(finding.wcagCriterionID)
                         .font(Typography.mono)
                         .foregroundStyle(ColorTokens.brandPrimary)
+                    if let name = WCAGDatabase.criterion(for: finding.wcagCriterionID)?.name {
+                        Text(name)
+                            .font(Typography.caption)
+                            .foregroundStyle(ColorTokens.textSecondary)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                if finding.isFixed {
+                    Label("Fixed", systemImage: "checkmark.circle.fill")
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.pass)
                 }
             }
 
@@ -115,24 +167,28 @@ struct ReportPreviewView: View {
         .padding(Spacing.md)
         .background(ColorTokens.backgroundSecondary)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .combine)
     }
 
-    private func generateReportText() -> String {
-        var text = "Accessibility Audit Report\n"
-        text += "App: \(audit.appName)\n"
-        text += "Audit: \(audit.name)\n"
-        text += "Total Findings: \(audit.totalFindings)\n\n"
+    // MARK: - PDF
 
-        for screen in audit.screens.sorted(by: { $0.orderIndex < $1.orderIndex }) {
-            text += "--- \(screen.name) ---\n"
-            for finding in screen.findings {
-                text += "[\(finding.severity.displayName)] \(finding.wcagCriterionID): \(finding.findingDescription)\n"
-                if !finding.recommendation.isEmpty {
-                    text += "  Fix: \(finding.recommendation)\n"
-                }
-                text += "\n"
-            }
+    private func generatePDF() {
+        pdfData = PDFReportService.generateReport(for: audit)
+    }
+}
+
+struct PDFDocument: Transferable {
+    let data: Data
+    let filename: String
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .pdf) { doc in
+            doc.data
         }
-        return text
+        FileRepresentation(exportedContentType: .pdf) { doc in
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent(doc.filename)
+            try doc.data.write(to: url)
+            return SentTransferredFile(url)
+        }
     }
 }

@@ -5,33 +5,29 @@ struct AnnotationPin: View {
     let severity: Severity
     let isSelected: Bool
 
-    private var pinColor: Color {
-        switch severity {
-        case .critical: ColorTokens.severityCritical
-        case .major: ColorTokens.severityMajor
-        case .minor: ColorTokens.severityMinor
-        case .advisory: ColorTokens.severityAdvisory
-        }
-    }
-
     var body: some View {
         ZStack {
             Circle()
                 .fill(.white)
-                .frame(width: 28, height: 28)
-                .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
+                .frame(width: 32, height: 32)
+                .shadow(color: .black.opacity(0.25), radius: 3, y: 1)
 
             Circle()
-                .fill(pinColor)
-                .frame(width: 24, height: 24)
+                .fill(severity.color)
+                .frame(width: 28, height: 28)
 
             Text("\(number)")
-                .font(.system(size: 12, weight: .bold))
+                .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
         }
-        .scaleEffect(isSelected ? 1.2 : 1.0)
-        .animation(.spring(response: 0.2), value: isSelected)
+        .frame(width: 44, height: 44)
+        .contentShape(Circle())
+        .scaleEffect(isSelected ? 1.15 : 1.0)
+        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isSelected)
         .accessibilityElement()
-        .accessibilityLabel("Finding \(number), \(severity.displayName)")
+        .accessibilityLabel("Finding \(number)")
+        .accessibilityValue(severity.displayName)
+        .accessibilityHint("Double-tap to view or edit this finding")
+        .accessibilityAddTraits(.isButton)
     }
 }

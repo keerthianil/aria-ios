@@ -27,6 +27,7 @@ struct AuditListView: View {
                         }
                         .onDelete(perform: deleteAudits)
                     }
+                    .listStyle(.insetGrouped)
                 }
             }
             .navigationTitle("Audits")
@@ -40,6 +41,7 @@ struct AuditListView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Create new audit")
                 }
             }
             .sheet(isPresented: $showCreateAudit) {
@@ -53,22 +55,47 @@ struct AuditListView: View {
 
     private func auditRow(_ audit: Audit) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text(audit.name)
-                .font(Typography.headline)
-            Text(audit.appName)
-                .font(Typography.subheadline)
-                .foregroundStyle(ColorTokens.textSecondary)
+            HStack {
+                Text(audit.name)
+                    .font(Typography.headline)
+                Spacer()
+                statusBadge(audit.status)
+            }
+
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: audit.platform.iconName)
+                    .font(.caption)
+                Text(audit.appName)
+                    .font(Typography.subheadline)
+            }
+            .foregroundStyle(ColorTokens.textSecondary)
+
             HStack(spacing: Spacing.md) {
                 Label("\(audit.screens.count) screens", systemImage: "rectangle.on.rectangle")
                 Label("\(audit.totalFindings) findings", systemImage: "exclamationmark.circle")
                 if audit.criticalCount > 0 {
-                    SeverityBadge(severity: .critical, count: audit.criticalCount)
+                    SeverityBadge(severity: .critical, count: audit.criticalCount, style: .compact)
                 }
             }
             .font(Typography.caption)
             .foregroundStyle(ColorTokens.textSecondary)
+
+            Text(audit.modifiedDate, format: .dateTime.month(.abbreviated).day().year())
+                .font(Typography.caption2)
+                .foregroundStyle(ColorTokens.textTertiary)
         }
         .padding(.vertical, Spacing.xs)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func statusBadge(_ status: AuditStatus) -> some View {
+        Text(status.displayName)
+            .font(.system(size: 10, weight: .medium))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(status == .complete ? ColorTokens.pass.opacity(0.12) : ColorTokens.brandPrimary.opacity(0.1))
+            .foregroundStyle(status == .complete ? ColorTokens.pass : ColorTokens.brandPrimary)
+            .clipShape(Capsule())
     }
 
     private func deleteAudits(at offsets: IndexSet) {

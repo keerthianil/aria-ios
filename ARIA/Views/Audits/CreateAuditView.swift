@@ -7,6 +7,8 @@ struct CreateAuditView: View {
 
     @State private var name = ""
     @State private var appName = ""
+    @State private var platform: Platform = .iOS
+    @State private var auditorName = ""
 
     var body: some View {
         NavigationStack {
@@ -14,6 +16,22 @@ struct CreateAuditView: View {
                 Section("Audit Details") {
                     TextField("Audit name", text: $name, prompt: Text("e.g., Q2 Accessibility Review"))
                     TextField("App name", text: $appName, prompt: Text("e.g., Spotify iOS"))
+                }
+
+                Section("Platform") {
+                    Picker("Platform", selection: $platform) {
+                        ForEach(Platform.allCases) { p in
+                            Label(p.displayName, systemImage: p.iconName)
+                                .tag(p)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityLabel("Target platform")
+                }
+
+                Section("Auditor") {
+                    TextField("Your name", text: $auditorName, prompt: Text("e.g., Keerthi Anil"))
                 }
 
                 Section {
@@ -30,11 +48,11 @@ struct CreateAuditView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Create") {
-                        let audit = Audit(name: name, appName: appName)
+                        let audit = Audit(name: name, appName: appName, platform: platform, auditorName: auditorName)
                         modelContext.insert(audit)
                         dismiss()
                     }
-                    .bold()
+                    .fontWeight(.semibold)
                     .disabled(name.isEmpty || appName.isEmpty)
                 }
             }

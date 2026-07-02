@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import UIKit
 
 @Model
 final class AuditScreen {
@@ -11,6 +12,15 @@ final class AuditScreen {
 
     @Relationship(deleteRule: .cascade, inverse: \Finding.screen)
     var findings: [Finding]
+
+    var screenshotImage: UIImage? {
+        guard let screenshotData else { return nil }
+        return UIImage(data: screenshotData)
+    }
+
+    var sortedFindings: [Finding] {
+        findings.sorted { $0.severity.sortOrder < $1.severity.sortOrder }
+    }
 
     init(name: String, screenshotData: Data? = nil, orderIndex: Int = 0) {
         self.id = UUID()

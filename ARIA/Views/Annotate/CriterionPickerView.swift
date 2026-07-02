@@ -5,15 +5,12 @@ struct CriterionPickerView: View {
     @Binding var selectedID: String
     @State private var searchText = ""
 
-    private var filteredCriteria: [WCAGCriterion] {
-        WCAGDatabase.search(searchText)
-    }
-
     private var groupedCriteria: [(category: WCAGCategory, criteria: [WCAGCriterion])] {
         if searchText.isEmpty {
             return WCAGDatabase.byCategory()
         } else {
-            let grouped = Dictionary(grouping: filteredCriteria, by: \.category)
+            let filtered = WCAGDatabase.search(searchText)
+            let grouped = Dictionary(grouping: filtered, by: \.category)
             return WCAGCategory.allCases.compactMap { cat in
                 guard let items = grouped[cat], !items.isEmpty else { return nil }
                 return (category: cat, criteria: items)
@@ -25,9 +22,14 @@ struct CriterionPickerView: View {
         NavigationStack {
             List {
                 ForEach(groupedCriteria, id: \.category) { group in
-                    Section(group.category.rawValue) {
+                    Section {
                         ForEach(group.criteria) { criterion in
                             criterionRow(criterion)
+                        }
+                    } header: {
+                        HStack(spacing: Spacing.sm) {
+                            Image(systemName: group.category.iconName)
+                            Text(group.category.rawValue)
                         }
                     }
                 }
@@ -49,13 +51,13 @@ struct CriterionPickerView: View {
             dismiss()
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: Spacing.sm) {
                         Text(criterion.id)
                             .font(Typography.mono)
                             .foregroundStyle(ColorTokens.brandPrimary)
                         Text("Level \(criterion.level)")
-                            .font(Typography.caption2)
+                            .font(.system(size: 10, weight: .medium))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
                             .background(ColorTokens.backgroundTertiary)
@@ -72,11 +74,13 @@ struct CriterionPickerView: View {
                 Spacer()
 
                 if selectedID == criterion.id {
-                    Image(systemName: "checkmark")
+                    Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(ColorTokens.brandPrimary)
                 }
             }
         }
         .foregroundStyle(ColorTokens.textPrimary)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(selectedID == criterion.id ? .isSelected : [])
     }
 }

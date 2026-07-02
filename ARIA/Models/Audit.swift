@@ -6,6 +6,8 @@ final class Audit {
     var id: UUID
     var name: String
     var appName: String
+    var platform: Platform
+    var auditorName: String
     var createdDate: Date
     var modifiedDate: Date
     var status: AuditStatus
@@ -18,30 +20,79 @@ final class Audit {
     }
 
     var criticalCount: Int {
-        screens.reduce(0) { $0 + $1.findings.filter { $0.severity == .critical }.count }
+        countFindings(withSeverity: .critical)
     }
 
     var majorCount: Int {
-        screens.reduce(0) { $0 + $1.findings.filter { $0.severity == .major }.count }
+        countFindings(withSeverity: .major)
     }
 
-    var progress: Double {
-        guard !screens.isEmpty else { return 0 }
-        let screensWithFindings = screens.filter { !$0.findings.isEmpty }.count
-        return Double(screensWithFindings) / Double(screens.count)
+    var moderateCount: Int {
+        countFindings(withSeverity: .moderate)
     }
 
-    init(name: String, appName: String) {
+    var minorCount: Int {
+        countFindings(withSeverity: .minor)
+    }
+
+    var openCount: Int {
+        screens.reduce(0) { $0 + $1.findings.filter { $0.status == .open }.count }
+    }
+
+    var sortedScreens: [AuditScreen] {
+        screens.sorted { $0.orderIndex < $1.orderIndex }
+    }
+
+    init(name: String, appName: String, platform: Platform = .iOS, auditorName: String = "") {
         self.id = UUID()
         self.name = name
         self.appName = appName
+        self.platform = platform
+        self.auditorName = auditorName
         self.createdDate = .now
         self.modifiedDate = .now
         self.status = .inProgress
         self.screens = []
     }
+
+    func touch() {
+        modifiedDate = .now
+    }
+
+    private func countFindings(withSeverity severity: Severity) -> Int {
+        screens.reduce(0) { $0 + $1.findings.filter { $0.severity == severity }.count }
+    }
 }
 
 enum AuditStatus: String, Codable {
     case inProgress, complete
+
+    var displayName: String {
+        switch self {
+        case .inProgress: "In Progress"
+        case .complete: "Complete"
+        }
+    }
+}
+
+enum Platform: String, Codable, CaseIterable, Identifiable {
+    case iOS, android, web
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .iOS: "iOS"
+        case .android: "Android"
+        case .web: "Web"
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .iOS: "iphone"
+        case .android: "candybarphone"
+        case .web: "globe"
+        }
+    }
 }
