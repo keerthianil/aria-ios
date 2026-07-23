@@ -2,13 +2,20 @@ import Foundation
 import SwiftData
 
 struct MockDataService {
+    private static let hasSeededKey = "aria.hasSeededMockData"
+
+    /// Seeds sample audits exactly once (first launch). After that, an empty list is a real
+    /// empty state — deleting every audit no longer silently repopulates the samples.
     static func populateIfEmpty(context: ModelContext) {
+        guard !UserDefaults.standard.bool(forKey: hasSeededKey) else { return }
+
         let descriptor = FetchDescriptor<Audit>()
         let count = (try? context.fetchCount(descriptor)) ?? 0
-        guard count == 0 else { return }
-
-        createSpotifyAudit(context: context)
-        createAirbnbAudit(context: context)
+        if count == 0 {
+            createSpotifyAudit(context: context)
+            createAirbnbAudit(context: context)
+        }
+        UserDefaults.standard.set(true, forKey: hasSeededKey)
     }
 
     private static func createSpotifyAudit(context: ModelContext) {

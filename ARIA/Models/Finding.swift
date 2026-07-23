@@ -11,7 +11,8 @@ final class Finding {
     var severity: Severity
     var findingDescription: String
     var recommendation: String
-    var status: FindingStatus
+    /// Single source of truth for resolution state. (Replaces the old `status`/`isFixed`
+    /// pair, which could drift out of sync.)
     var isFixed: Bool
     var createdAt: Date
     var screen: AuditScreen?
@@ -31,7 +32,6 @@ final class Finding {
         self.severity = severity
         self.findingDescription = findingDescription
         self.recommendation = recommendation
-        self.status = .open
         self.isFixed = false
         self.createdAt = .now
     }
@@ -55,7 +55,8 @@ enum Severity: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var numericLevel: Int {
+    /// Lower number = more severe. Used for sorting findings worst-first.
+    var sortOrder: Int {
         switch self {
         case .critical: 1
         case .major: 2
@@ -64,8 +65,7 @@ enum Severity: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var sortOrder: Int { numericLevel }
-
+    /// SwiftUI color — the single source of truth for this severity's color.
     var color: Color {
         switch self {
         case .critical: ColorTokens.severityCritical
@@ -75,6 +75,9 @@ enum Severity: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// UIKit bridge derived from the same `color`, so PDF rendering never duplicates RGB values.
+    var uiColor: UIColor { UIColor(color) }
+
     var iconName: String {
         switch self {
         case .critical: "exclamationmark.octagon.fill"
@@ -83,8 +86,14 @@ enum Severity: String, Codable, CaseIterable, Identifiable {
         case .minor: "info.circle.fill"
         }
     }
-}
 
-enum FindingStatus: String, Codable {
-    case open, resolved
+    /// One-line plain-language explanation of what this severity means, surfaced in the UI.
+    var guidance: String {
+        switch self {
+        case .critical: "Blocks a core task for users of assistive technology."
+        case .major: "Significantly harder to use, but a workaround may exist."
+        case .moderate: "Noticeable friction that should be fixed."
+        case .minor: "Small issue or polish item."
+        }
+    }
 }

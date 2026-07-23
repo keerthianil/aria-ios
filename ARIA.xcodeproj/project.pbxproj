@@ -8,7 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		1919FB44480165A32E52A0BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 70FB18759ED33C7ED7AD8B3F /* Assets.xcassets */; };
+		19C5FCFFA0A0FD1EF632BDA6 /* ViolationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB512C0F18AC85DB026AC91 /* ViolationDetailView.swift */; };
 		19DB1A6A3C2E7A05B8516E0C /* AnnotationPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 197357710469AD7B42D81584 /* AnnotationPin.swift */; };
+		26B283349E4320302F551211 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399B87E1D1F2B2DD5AD0A652 /* CameraPicker.swift */; };
+		364861F62C1F33D942AFE02E /* ReorderScreensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A6E96C935FD45018F7E791 /* ReorderScreensView.swift */; };
 		374C1409E9B2439A510610B8 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9555F0DC93335F8426300737 /* Spacing.swift */; };
 		3F26B32B7370AA47A246457C /* AuditListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB7FB20B8C55E448AA0D983 /* AuditListView.swift */; };
 		4338B8506315C84D2A1FF86A /* ColorTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFFF69B57FBEAF7A8969C0C9 /* ColorTokens.swift */; };
@@ -17,8 +20,11 @@
 		6BB19014DFF0238438AF01F5 /* LearnHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F1DC042E1D3A6551B6A938 /* LearnHomeView.swift */; };
 		72852369392AAB16B5EB357F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D467861CAC52737B4D912E /* ContentView.swift */; };
 		78B3F75E9A3CFD1D981A3887 /* MockDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 285776CEF7D6DA2B2EFAC135 /* MockDataService.swift */; };
+		8085E15508B0E32A6F558B85 /* ContrastMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E36FCEC04DEC00FCF8A63DC /* ContrastMath.swift */; };
 		82F4517CC77FBCD1269B65E2 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C69004C1C92F4BE49F250771 /* EmptyStateView.swift */; };
+		849580D3D5B7BD57A8C321F2 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0ABD12F9731308CA0A297E /* OnboardingView.swift */; };
 		8589C037B0692B7559DE8911 /* WCAGCriterion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42050FED580D76BB2E2EE8B1 /* WCAGCriterion.swift */; };
+		86843111E3C74B6D9E5E63FD /* FindingsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E24B7AF011CB6A8F50397C /* FindingsDashboardView.swift */; };
 		895D530EE1010F52DD7C6298 /* CriterionPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05715A6F34984BA2438C8E67 /* CriterionPickerView.swift */; };
 		8A3658F9FDACB52E953BE8F5 /* SeverityBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724E2136AEB328C5E08012C4 /* SeverityBadge.swift */; };
 		95835347E8E64FA8C7621132 /* Finding.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5CD1C295286B771D40C9D6D /* Finding.swift */; };
@@ -26,10 +32,11 @@
 		9CE97BD3D860929866364927 /* FindingFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5410C1317C6412EC36DA936 /* FindingFormSheet.swift */; };
 		A12EF98C98625657062AD4DE /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A14665438AA50D414FE12B6 /* Typography.swift */; };
 		BD537834ACB756BE47777053 /* ARIAApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C760E98727C63A863403E30 /* ARIAApp.swift */; };
+		C0919F618EB3F17A03C9B5E5 /* ContrastCheckerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD461F47A370B3D7AD1F4B4 /* ContrastCheckerView.swift */; };
 		C4CB8E04DF77D1FAAB97A1F1 /* AuditDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A516498BA9718D1FED3E9D5 /* AuditDetailView.swift */; };
 		CB72E8BC69A493375DEA9E6D /* Audit.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD438F4ABCF83F3AE2F5AE0A /* Audit.swift */; };
 		DF6D351A7385642CEACBD7D1 /* AuditScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 744A2F4671856AD760A336D1 /* AuditScreen.swift */; };
-		E1A2B3C4D5E6F7A8B9C0D1E2 /* PDFReportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* PDFReportService.swift */; };
+		F1916725A4B3B619DAA6AC31 /* PDFReportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A696F49EE7EAAD581B1D5B31 /* PDFReportService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,26 +47,41 @@
 		285776CEF7D6DA2B2EFAC135 /* MockDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDataService.swift; sourceTree = "<group>"; };
 		28F1DC042E1D3A6551B6A938 /* LearnHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnHomeView.swift; sourceTree = "<group>"; };
 		2F13E7B2051EBC31C7902EBA /* AnnotationCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationCanvasView.swift; sourceTree = "<group>"; };
+		399B87E1D1F2B2DD5AD0A652 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		42050FED580D76BB2E2EE8B1 /* WCAGCriterion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WCAGCriterion.swift; sourceTree = "<group>"; };
+		50E24B7AF011CB6A8F50397C /* FindingsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindingsDashboardView.swift; sourceTree = "<group>"; };
+		5CB512C0F18AC85DB026AC91 /* ViolationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViolationDetailView.swift; sourceTree = "<group>"; };
 		6C760E98727C63A863403E30 /* ARIAApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARIAApp.swift; sourceTree = "<group>"; };
 		70FB18759ED33C7ED7AD8B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		724E2136AEB328C5E08012C4 /* SeverityBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeverityBadge.swift; sourceTree = "<group>"; };
 		744A2F4671856AD760A336D1 /* AuditScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditScreen.swift; sourceTree = "<group>"; };
+		75A6E96C935FD45018F7E791 /* ReorderScreensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReorderScreensView.swift; sourceTree = "<group>"; };
 		84AE3F23B51FC952052FB851 /* CreateAuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAuditView.swift; sourceTree = "<group>"; };
 		92BF87AA2D8BC6A1C66DDAB2 /* ARIA.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ARIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		92D467861CAC52737B4D912E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		94A3E77D57AD1CC55BB01C30 /* ReportPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportPreviewView.swift; sourceTree = "<group>"; };
 		9555F0DC93335F8426300737 /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
+		9E36FCEC04DEC00FCF8A63DC /* ContrastMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContrastMath.swift; sourceTree = "<group>"; };
+		A696F49EE7EAAD581B1D5B31 /* PDFReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFReportService.swift; sourceTree = "<group>"; };
 		B5410C1317C6412EC36DA936 /* FindingFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindingFormSheet.swift; sourceTree = "<group>"; };
+		BDD461F47A370B3D7AD1F4B4 /* ContrastCheckerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContrastCheckerView.swift; sourceTree = "<group>"; };
 		C69004C1C92F4BE49F250771 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		DD438F4ABCF83F3AE2F5AE0A /* Audit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audit.swift; sourceTree = "<group>"; };
 		DFFF69B57FBEAF7A8969C0C9 /* ColorTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTokens.swift; sourceTree = "<group>"; };
 		EDB7FB20B8C55E448AA0D983 /* AuditListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditListView.swift; sourceTree = "<group>"; };
 		F5CD1C295286B771D40C9D6D /* Finding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Finding.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E1F2 /* PDFReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFReportService.swift; sourceTree = "<group>"; };
+		FE0ABD12F9731308CA0A297E /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		02EBD2D6C5DC99815E301E01 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				FE0ABD12F9731308CA0A297E /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		16CF72A748F9770E048AF349 = {
 			isa = PBXGroup;
 			children = (
@@ -72,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				28F1DC042E1D3A6551B6A938 /* LearnHomeView.swift */,
+				5CB512C0F18AC85DB026AC91 /* ViolationDetailView.swift */,
 			);
 			path = Learn;
 			sourceTree = "<group>";
@@ -81,7 +104,9 @@
 			children = (
 				655F0E7A9EF3CB8484FFB870 /* Annotate */,
 				EAE2635BE95CE4AA4EFAE331 /* Audits */,
+				4C189EBD3E233976661C8377 /* Contrast */,
 				23EB21FF3A992D874DE7D327 /* Learn */,
+				02EBD2D6C5DC99815E301E01 /* Onboarding */,
 				9328F4F551AA8CE1A4AE2338 /* Report */,
 				469F0287C88327331376D7DD /* Shared */,
 			);
@@ -100,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				197357710469AD7B42D81584 /* AnnotationPin.swift */,
+				399B87E1D1F2B2DD5AD0A652 /* CameraPicker.swift */,
 				724E2136AEB328C5E08012C4 /* SeverityBadge.swift */,
 			);
 			path = Components;
@@ -139,6 +165,14 @@
 			path = ARIA;
 			sourceTree = "<group>";
 		};
+		4C189EBD3E233976661C8377 /* Contrast */ = {
+			isa = PBXGroup;
+			children = (
+				BDD461F47A370B3D7AD1F4B4 /* ContrastCheckerView.swift */,
+			);
+			path = Contrast;
+			sourceTree = "<group>";
+		};
 		655F0E7A9EF3CB8484FFB870 /* Annotate */ = {
 			isa = PBXGroup;
 			children = (
@@ -153,7 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				285776CEF7D6DA2B2EFAC135 /* MockDataService.swift */,
-				A1B2C3D4E5F6A7B8C9D0E1F2 /* PDFReportService.swift */,
+				A696F49EE7EAAD581B1D5B31 /* PDFReportService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -170,6 +204,7 @@
 			isa = PBXGroup;
 			children = (
 				DFFF69B57FBEAF7A8969C0C9 /* ColorTokens.swift */,
+				9E36FCEC04DEC00FCF8A63DC /* ContrastMath.swift */,
 				9555F0DC93335F8426300737 /* Spacing.swift */,
 				0A14665438AA50D414FE12B6 /* Typography.swift */,
 			);
@@ -190,6 +225,8 @@
 				0A516498BA9718D1FED3E9D5 /* AuditDetailView.swift */,
 				EDB7FB20B8C55E448AA0D983 /* AuditListView.swift */,
 				84AE3F23B51FC952052FB851 /* CreateAuditView.swift */,
+				50E24B7AF011CB6A8F50397C /* FindingsDashboardView.swift */,
+				75A6E96C935FD45018F7E791 /* ReorderScreensView.swift */,
 			);
 			path = Audits;
 			sourceTree = "<group>";
@@ -271,20 +308,27 @@
 				C4CB8E04DF77D1FAAB97A1F1 /* AuditDetailView.swift in Sources */,
 				3F26B32B7370AA47A246457C /* AuditListView.swift in Sources */,
 				DF6D351A7385642CEACBD7D1 /* AuditScreen.swift in Sources */,
+				26B283349E4320302F551211 /* CameraPicker.swift in Sources */,
 				4338B8506315C84D2A1FF86A /* ColorTokens.swift in Sources */,
 				72852369392AAB16B5EB357F /* ContentView.swift in Sources */,
+				C0919F618EB3F17A03C9B5E5 /* ContrastCheckerView.swift in Sources */,
+				8085E15508B0E32A6F558B85 /* ContrastMath.swift in Sources */,
 				968C6210AC5183459186B22D /* CreateAuditView.swift in Sources */,
 				895D530EE1010F52DD7C6298 /* CriterionPickerView.swift in Sources */,
 				82F4517CC77FBCD1269B65E2 /* EmptyStateView.swift in Sources */,
 				95835347E8E64FA8C7621132 /* Finding.swift in Sources */,
 				9CE97BD3D860929866364927 /* FindingFormSheet.swift in Sources */,
+				86843111E3C74B6D9E5E63FD /* FindingsDashboardView.swift in Sources */,
 				6BB19014DFF0238438AF01F5 /* LearnHomeView.swift in Sources */,
 				78B3F75E9A3CFD1D981A3887 /* MockDataService.swift in Sources */,
+				849580D3D5B7BD57A8C321F2 /* OnboardingView.swift in Sources */,
+				F1916725A4B3B619DAA6AC31 /* PDFReportService.swift in Sources */,
+				364861F62C1F33D942AFE02E /* ReorderScreensView.swift in Sources */,
 				4BFE5904F6DC43B98874AF85 /* ReportPreviewView.swift in Sources */,
 				8A3658F9FDACB52E953BE8F5 /* SeverityBadge.swift in Sources */,
 				374C1409E9B2439A510610B8 /* Spacing.swift in Sources */,
 				A12EF98C98625657062AD4DE /* Typography.swift in Sources */,
-				E1A2B3C4D5E6F7A8B9C0D1E2 /* PDFReportService.swift in Sources */,
+				19C5FCFFA0A0FD1EF632BDA6 /* ViolationDetailView.swift in Sources */,
 				8589C037B0692B7559DE8911 /* WCAGCriterion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -419,8 +463,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ARIA needs access to your photo library to import screenshots for accessibility auditing.";
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ARIA uses the camera to capture screens you want to audit for accessibility.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -443,8 +487,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ARIA needs access to your photo library to import screenshots for accessibility auditing.";
 				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ARIA uses the camera to capture screens you want to audit for accessibility.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

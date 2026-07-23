@@ -5,10 +5,14 @@ struct AuditDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var audit: Audit
     @State private var selectedPhotos: [PhotosPickerItem] = []
-    @State private var isImporting = false
-    @State private var showEditTitle = false
+    @State private var showPhotoPicker = false
+    @State private var showCamera = false
+    @State private var showEditAudit = false
+    @State private var showReorder = false
+    @State private var showRenameScreen = false
     @State private var editedScreenName = ""
     @State private var screenToRename: AuditScreen?
+    @State private var screenPendingDelete: AuditScreen?
 
     var body: some View {
         ScrollView {
@@ -31,24 +35,80 @@ struct AuditDetailView: View {
                         }
                         .accessibilityLabel("View report")
                     }
-
-                    Menu {
-                        Button {
-                            audit.status = audit.status == .complete ? .inProgress : .complete
-                            audit.touch()
-                        } label: {
-                            Label(
-                                audit.status == .complete ? "Mark In Progress" : "Mark Complete",
-                                systemImage: audit.status == .complete ? "arrow.uturn.backward" : "checkmark.circle"
-                            )
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                    .accessibilityLabel("Audit options")
+                    menu
                 }
             }
         }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $selectedPhotos,
+                      maxSelectionCount: 20, matching: .images)
+        .onChange(of: selectedPhotos) { _, newItems in
+            Task { await importScreenshots(from: newItems) }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker { data in appendScreen(imageData: data) }
+                .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showEditAudit) {
+            CreateAuditView(auditToEdit: audit)
+        }
+        .sheet(isPresented: $showReorder) {
+            ReorderScreensView(audit: audit)
+        }
+        .alert("Rename Screen", isPresented: $showRenameScreen) {
+            TextField("Screen name", text: $editedScreenName)
+            Button("Cancel", role: .cancel) {}
+            Button("Save") {
+                screenToRename?.name = editedScreenName
+                audit.touch()
+            }
+        }
+        .confirmationDialog(
+            "Delete this screen?",
+            isPresented: Binding(get: { screenPendingDelete != nil },
+                                 set: { if !$0 { screenPendingDelete = nil } }),
+            titleVisibility: .visible
+        ) {
+            Button("Delete Screen", role: .destructive) {
+                if let screen = screenPendingDelete { deleteScreen(screen) }
+                screenPendingDelete = nil
+            }
+            Button("Cancel", role: .cancel) { screenPendingDelete = nil }
+        } message: {
+            Text("This removes the screenshot and all of its findings. This can't be undone.")
+        }
+    }
+
+    // MARK: - Toolbar menu
+
+    private var menu: some View {
+        Menu {
+            Button {
+                showEditAudit = true
+            } label: {
+                Label("Edit Details", systemImage: "pencil")
+            }
+
+            if audit.screens.count > 1 {
+                Button {
+                    showReorder = true
+                } label: {
+                    Label("Reorder Screens", systemImage: "arrow.up.arrow.down")
+                }
+            }
+
+            Button {
+                audit.status = audit.status == .complete ? .inProgress : .complete
+                audit.touch()
+            } label: {
+                Label(
+                    audit.status == .complete ? "Mark In Progress" : "Mark Complete",
+                    systemImage: audit.status == .complete ? "arrow.uturn.backward" : "checkmark.circle"
+                )
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .accessibilityLabel("Audit options")
     }
 
     // MARK: - Summary Card
@@ -77,20 +137,42 @@ struct AuditDetailView: View {
                 statBlock("\(audit.openCount)", label: "Open")
             }
 
-            HStack(spacing: Spacing.md) {
-                ForEach(Severity.allCases) { sev in
-                    let count = countFindings(for: sev)
-                    if count > 0 {
-                        SeverityBadge(severity: sev, count: count, style: .compact)
+            if audit.totalFindings > 0 {
+                VStack(spacing: Spacing.sm) {
+                    HStack(spacing: Spacing.md) {
+                        ForEach(Severity.allCases) { sev in
+                            let count = audit.findingsCount(for: sev)
+                            if count > 0 {
+                                SeverityBadge(severity: sev, count: count, style: .compact)
+                            }
+                        }
+                        Spacer()
+                    }
+
+                    ProgressView(value: audit.resolutionProgress) {
+                        Text("\(audit.resolvedCount) of \(audit.totalFindings) fixed")
+                            .font(Typography.caption)
+                            .foregroundStyle(ColorTokens.textSecondary)
+                    }
+                    .tint(ColorTokens.pass)
+
+                    NavigationLink {
+                        FindingsDashboardView(audit: audit)
+                    } label: {
+                        HStack {
+                            Text("View all findings")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                        }
+                        .font(Typography.subheadline)
+                        .foregroundStyle(ColorTokens.brandPrimary)
                     }
                 }
-                Spacer()
             }
         }
         .padding(Spacing.xl)
         .background(ColorTokens.backgroundSecondary)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .accessibilityElement(children: .combine)
     }
 
     private func statBlock(_ value: String, label: String) -> some View {
@@ -103,10 +185,7 @@ struct AuditDetailView: View {
                 .foregroundStyle(ColorTokens.textSecondary)
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private func countFindings(for severity: Severity) -> Int {
-        audit.screens.reduce(0) { $0 + $1.findings.filter { $0.severity == severity }.count }
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Screens List
@@ -117,17 +196,17 @@ struct AuditDetailView: View {
                 Text("Screens")
                     .font(Typography.headline)
                 Spacer()
-                importButton
+                addScreenMenu
             }
 
             if audit.screens.isEmpty {
                 EmptyStateView(
                     icon: "photo.on.rectangle",
                     title: "No screens yet",
-                    message: "Import screenshots of the screens you want to audit.",
-                    actionTitle: "Import Screenshots"
+                    message: "Import screenshots or capture a screen to start auditing.",
+                    actionTitle: "Add Screenshots"
                 ) {
-                    isImporting = true
+                    showPhotoPicker = true
                 }
             } else {
                 ForEach(audit.sortedScreens) { screen in
@@ -141,12 +220,12 @@ struct AuditDetailView: View {
                         Button {
                             screenToRename = screen
                             editedScreenName = screen.name
-                            showEditTitle = true
+                            showRenameScreen = true
                         } label: {
                             Label("Rename", systemImage: "pencil")
                         }
                         Button(role: .destructive) {
-                            deleteScreen(screen)
+                            screenPendingDelete = screen
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -154,30 +233,26 @@ struct AuditDetailView: View {
                 }
             }
         }
-        .alert("Rename Screen", isPresented: $showEditTitle) {
-            TextField("Screen name", text: $editedScreenName)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
-                screenToRename?.name = editedScreenName
-                audit.touch()
-            }
-        }
     }
 
-    private var importButton: some View {
-        PhotosPicker(
-            selection: $selectedPhotos,
-            maxSelectionCount: 20,
-            matching: .screenshots
-        ) {
-            Label("Import", systemImage: "photo.badge.plus")
+    private var addScreenMenu: some View {
+        Menu {
+            Button {
+                showPhotoPicker = true
+            } label: {
+                Label("Choose from Photos", systemImage: "photo.on.rectangle")
+            }
+            Button {
+                showCamera = true
+            } label: {
+                Label("Take Photo", systemImage: "camera")
+            }
+        } label: {
+            Label("Add", systemImage: "plus.circle")
                 .font(Typography.subheadline)
                 .fontWeight(.medium)
         }
-        .onChange(of: selectedPhotos) { _, newItems in
-            Task { await importScreenshots(from: newItems) }
-        }
-        .accessibilityHint("Import screenshots from your photo library")
+        .accessibilityLabel("Add a screen")
     }
 
     private func screenRow(_ screen: AuditScreen) -> some View {
@@ -232,23 +307,24 @@ struct AuditDetailView: View {
     // MARK: - Import
 
     private func importScreenshots(from items: [PhotosPickerItem]) async {
-        let startIndex = audit.screens.count
-        for (i, item) in items.enumerated() {
+        for item in items {
             guard let data = try? await item.loadTransferable(type: Data.self) else { continue }
-
-            guard let image = UIImage(data: data) else { continue }
-            let compressed = image.jpegData(compressionQuality: 0.7) ?? data
-
-            let screen = AuditScreen(
-                name: "Screen \(startIndex + i + 1)",
-                screenshotData: compressed,
-                orderIndex: startIndex + i
-            )
-            screen.audit = audit
-            modelContext.insert(screen)
+            appendScreen(imageData: data)
         }
-        audit.touch()
         selectedPhotos = []
+    }
+
+    private func appendScreen(imageData: Data) {
+        let compressed = UIImage(data: imageData)?.jpegData(compressionQuality: 0.7) ?? imageData
+        let index = audit.screens.count
+        let screen = AuditScreen(
+            name: "Screen \(index + 1)",
+            screenshotData: compressed,
+            orderIndex: index
+        )
+        screen.audit = audit
+        modelContext.insert(screen)
+        audit.touch()
     }
 
     private func deleteScreen(_ screen: AuditScreen) {

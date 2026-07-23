@@ -1,5 +1,6 @@
 import UIKit
 import PDFKit
+import AVFoundation
 
 struct PDFReportService {
 
@@ -33,7 +34,6 @@ struct PDFReportService {
                     .foregroundColor: color,
                     .paragraphStyle: paragraphStyle
                 ]
-                let rect = CGRect(x: margin, y: yPosition, width: maxWidth, height: .greatestFiniteMagnitude)
                 let boundingRect = (text as NSString).boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
                                                                     options: [.usesLineFragmentOrigin, .usesFontLeading],
                                                                     attributes: attrs, context: nil)
@@ -61,9 +61,61 @@ struct PDFReportService {
                 path.fill()
             }
 
+            let brandColor = UIColor(named: "BrandPrimary") ?? .systemBlue
+
+            /// Draws the screen's screenshot at a bounded size with numbered severity pins overlaid,
+            /// so the report shows *where* each finding is — not just a text list.
+            func drawAnnotatedScreenshot(_ screen: AuditScreen) {
+                guard let image = screen.screenshotImage else { return }
+                let maxThumbWidth: CGFloat = 180
+                let maxThumbHeight: CGFloat = 320
+                let box = CGRect(x: margin, y: yPosition,
+                                 width: maxThumbWidth, height: maxThumbHeight)
+                let fitted = AVMakeRect(aspectRatio: image.size, insideRect: box)
+                ensureSpace(fitted.height + 12)
+                let drawRect = CGRect(x: margin, y: yPosition, width: fitted.width, height: fitted.height)
+                image.draw(in: drawRect)
+
+                for (index, finding) in screen.sortedFindings.enumerated() {
+                    let cx = drawRect.minX + CGFloat(finding.pinX) * drawRect.width
+                    let cy = drawRect.minY + CGFloat(finding.pinY) * drawRect.height
+                    let r: CGFloat = 9
+                    let circle = UIBezierPath(ovalIn: CGRect(x: cx - r, y: cy - r, width: r * 2, height: r * 2))
+                    finding.severity.uiColor.setFill()
+                    UIColor.white.setStroke()
+                    circle.lineWidth = 1.5
+                    circle.fill()
+                    circle.stroke()
+                    let num = "\(index + 1)"
+                    let numAttrs: [NSAttributedString.Key: Any] = [
+                        .font: UIFont.systemFont(ofSize: 10, weight: .bold),
+                        .foregroundColor: UIColor.white
+                    ]
+                    let size = (num as NSString).size(withAttributes: numAttrs)
+                    (num as NSString).draw(at: CGPoint(x: cx - size.width / 2, y: cy - size.height / 2),
+                                           withAttributes: numAttrs)
+                }
+                yPosition += drawRect.height + 12
+            }
+
             // MARK: - Cover Page
             startNewPage()
             yPosition = pageHeight * 0.3
+
+            // Brand mark
+            let markRect = CGRect(x: margin, y: yPosition - 56, width: 40, height: 40)
+            let markPath = UIBezierPath(roundedRect: markRect, cornerRadius: 10)
+            brandColor.setFill()
+            markPath.fill()
+            let markLetter = "A"
+            let markAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 24, weight: .bold),
+                .foregroundColor: UIColor.white
+            ]
+            let markSize = (markLetter as NSString).size(withAttributes: markAttrs)
+            (markLetter as NSString).draw(
+                at: CGPoint(x: markRect.midX - markSize.width / 2, y: markRect.midY - markSize.height / 2),
+                withAttributes: markAttrs)
 
             _ = drawText("Accessibility", font: .systemFont(ofSize: 32, weight: .bold), color: .label)
             yPosition += 2
@@ -101,12 +153,14 @@ struct PDFReportService {
             _ = drawText("Screens audited: \(audit.screens.count)", font: .systemFont(ofSize: 14, weight: .medium))
             yPosition += 16
 
-            let severities: [(String, Int, UIColor)] = [
-                ("Critical", audit.criticalCount, UIColor(red: 220/255, green: 38/255, blue: 38/255, alpha: 1)),
-                ("Major", audit.majorCount, UIColor(red: 234/255, green: 88/255, blue: 12/255, alpha: 1)),
-                ("Moderate", audit.moderateCount, UIColor(red: 202/255, green: 138/255, blue: 4/255, alpha: 1)),
-                ("Minor", audit.minorCount, UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1)),
-            ]
+            // Colors come straight from the Severity enum's shared token — no duplicated RGB here.
+            let severities: [(String, Int, UIColor)] = Severity.allCases.map {
+                ($0.displayName, audit.findingsCount(for: $0), $0.uiColor)
+            }
+
+            _ = drawText("Resolved: \(audit.resolvedCount) of \(audit.totalFindings)",
+                         font: .systemFont(ofSize: 14, weight: .medium), color: .secondaryLabel)
+            yPosition += 16
 
             for (label, count, color) in severities {
                 ensureSpace(24)
@@ -133,16 +187,12 @@ struct PDFReportService {
                              font: .systemFont(ofSize: 11), color: .secondaryLabel)
                 yPosition += 12
 
+                drawAnnotatedScreenshot(screen)
+
                 for finding in screen.sortedFindings {
                     ensureSpace(80)
 
-                    let severityColor: UIColor
-                    switch finding.severity {
-                    case .critical: severityColor = UIColor(red: 220/255, green: 38/255, blue: 38/255, alpha: 1)
-                    case .major: severityColor = UIColor(red: 234/255, green: 88/255, blue: 12/255, alpha: 1)
-                    case .moderate: severityColor = UIColor(red: 202/255, green: 138/255, blue: 4/255, alpha: 1)
-                    case .minor: severityColor = UIColor(red: 100/255, green: 116/255, blue: 139/255, alpha: 1)
-                    }
+                    let severityColor = finding.severity.uiColor
 
                     drawSeverityDot(color: severityColor, x: margin, y: yPosition)
 

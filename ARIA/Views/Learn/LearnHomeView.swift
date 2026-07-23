@@ -62,23 +62,27 @@ struct LearnHomeView: View {
     }
 
     private func learnRow(icon: String, title: String, subtitle: String, criterion: String) -> some View {
-        HStack(spacing: Spacing.md) {
-            Image(systemName: icon)
-                .frame(width: 24)
-                .foregroundStyle(ColorTokens.brandPrimary)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(Typography.headline)
-                Text(subtitle)
-                    .font(Typography.caption)
-                    .foregroundStyle(ColorTokens.textSecondary)
+        NavigationLink {
+            ViolationDetailView(criterionID: criterion)
+        } label: {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: icon)
+                    .frame(width: 24)
+                    .foregroundStyle(ColorTokens.brandPrimary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(Typography.headline)
+                    Text(subtitle)
+                        .font(Typography.caption)
+                        .foregroundStyle(ColorTokens.textSecondary)
+                }
+                Spacer()
+                Text(criterion)
+                    .font(Typography.mono)
+                    .foregroundStyle(ColorTokens.textTertiary)
             }
-            Spacer()
-            Text(criterion)
-                .font(Typography.mono)
-                .foregroundStyle(ColorTokens.textTertiary)
+            .accessibilityElement(children: .combine)
         }
-        .accessibilityElement(children: .combine)
     }
 
     private func criteriaList(_ category: WCAGCategory, criteria: [WCAGCriterion]) -> some View {

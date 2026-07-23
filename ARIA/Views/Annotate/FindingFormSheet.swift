@@ -4,10 +4,33 @@ struct FindingFormSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var finding: Finding
     @State private var showCriterionPicker = false
+    @State private var showDeleteConfirm = false
     var onDelete: (() -> Void)?
 
     private var selectedCriterion: WCAGCriterion? {
         WCAGDatabase.criteria.first { $0.id == finding.wcagCriterionID }
+    }
+
+    @ViewBuilder
+    private var criterionLabel: some View {
+        HStack {
+            if let criterion = selectedCriterion {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(criterion.fullTitle)
+                        .font(Typography.headline)
+                    Text(criterion.description)
+                        .font(Typography.caption)
+                        .foregroundStyle(ColorTokens.textSecondary)
+                        .lineLimit(2)
+                }
+            } else {
+                Text("Select criterion")
+                    .foregroundStyle(ColorTokens.textTertiary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .foregroundStyle(ColorTokens.textTertiary)
+        }
     }
 
     var body: some View {
@@ -17,24 +40,7 @@ struct FindingFormSheet: View {
                     Button {
                         showCriterionPicker = true
                     } label: {
-                        HStack {
-                            if let criterion = selectedCriterion {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(criterion.fullTitle)
-                                        .font(Typography.headline)
-                                    Text(criterion.description)
-                                        .font(Typography.caption)
-                                        .foregroundStyle(ColorTokens.textSecondary)
-                                        .lineLimit(2)
-                                }
-                            } else {
-                                Text("Select criterion")
-                                    .foregroundStyle(ColorTokens.textTertiary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundStyle(ColorTokens.textTertiary)
-                        }
+                        criterionLabel
                     }
                     .foregroundStyle(ColorTokens.textPrimary)
                     .accessibilityLabel("WCAG criterion")
@@ -42,7 +48,7 @@ struct FindingFormSheet: View {
                     .accessibilityHint("Opens the WCAG criterion picker")
                 }
 
-                Section("Severity") {
+                Section {
                     Picker("Severity", selection: $finding.severity) {
                         ForEach(Severity.allCases) { sev in
                             HStack(spacing: 8) {
@@ -55,6 +61,10 @@ struct FindingFormSheet: View {
                     }
                     .pickerStyle(.inline)
                     .labelsHidden()
+                } header: {
+                    Text("Severity")
+                } footer: {
+                    Text(finding.severity.guidance)
                 }
 
                 Section("What's wrong?") {
@@ -79,7 +89,7 @@ struct FindingFormSheet: View {
                 if onDelete != nil {
                     Section {
                         Button(role: .destructive) {
-                            onDelete?()
+                            showDeleteConfirm = true
                         } label: {
                             Label("Delete Finding", systemImage: "trash")
                                 .frame(maxWidth: .infinity, alignment: .center)
@@ -97,6 +107,12 @@ struct FindingFormSheet: View {
             }
             .sheet(isPresented: $showCriterionPicker) {
                 CriterionPickerView(selectedID: $finding.wcagCriterionID)
+            }
+            .confirmationDialog("Delete this finding?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+                Button("Delete Finding", role: .destructive) { onDelete?() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This can't be undone.")
             }
         }
     }

@@ -27,3 +27,4 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.keerthia.ARIA
         SUPPORTED_DESTINATIONS: "iphone"
         SWIFT_VERSION: "5.9"
+        INFOPLIST_KEY_NSCameraUsageDescription: "ARIA uses the camera to capture screens you want to audit for accessibility."

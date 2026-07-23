@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab: Tab = .audits
+    @AppStorage("aria.hasSeenOnboarding") private var hasSeenOnboarding = false
+    @State private var showOnboarding = false
 
     enum Tab: String {
         case audits, learn
@@ -22,5 +24,14 @@ struct ContentView: View {
                 .tag(Tab.learn)
         }
         .tint(ColorTokens.brandPrimary)
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView(isPresented: $showOnboarding)
+        }
+        .onChange(of: showOnboarding) { _, isShowing in
+            if !isShowing { hasSeenOnboarding = true }
+        }
+        .onAppear {
+            if !hasSeenOnboarding { showOnboarding = true }
+        }
     }
 }

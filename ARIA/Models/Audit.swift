@@ -15,28 +15,36 @@ final class Audit {
     @Relationship(deleteRule: .cascade, inverse: \AuditScreen.audit)
     var screens: [AuditScreen]
 
-    var totalFindings: Int {
-        screens.reduce(0) { $0 + $1.findings.count }
+    var allFindings: [Finding] {
+        screens.flatMap { $0.findings }
     }
 
-    var criticalCount: Int {
-        countFindings(withSeverity: .critical)
-    }
+    var totalFindings: Int { allFindings.count }
 
-    var majorCount: Int {
-        countFindings(withSeverity: .major)
-    }
+    var criticalCount: Int { findingsCount(for: .critical) }
+    var majorCount: Int { findingsCount(for: .major) }
+    var moderateCount: Int { findingsCount(for: .moderate) }
+    var minorCount: Int { findingsCount(for: .minor) }
 
-    var moderateCount: Int {
-        countFindings(withSeverity: .moderate)
-    }
-
-    var minorCount: Int {
-        countFindings(withSeverity: .minor)
-    }
-
+    /// Findings still needing a fix (single source of truth: `isFixed`).
     var openCount: Int {
-        screens.reduce(0) { $0 + $1.findings.filter { $0.status == .open }.count }
+        allFindings.filter { !$0.isFixed }.count
+    }
+
+    /// Findings marked fixed.
+    var resolvedCount: Int {
+        allFindings.filter { $0.isFixed }.count
+    }
+
+    /// 0.0–1.0 share of findings resolved. Returns 1.0 when there are no findings.
+    var resolutionProgress: Double {
+        guard totalFindings > 0 else { return 1.0 }
+        return Double(resolvedCount) / Double(totalFindings)
+    }
+
+    /// Reusable severity count — used by the UI and the PDF so nothing recomputes this by hand.
+    func findingsCount(for severity: Severity) -> Int {
+        allFindings.filter { $0.severity == severity }.count
     }
 
     var sortedScreens: [AuditScreen] {
@@ -57,10 +65,6 @@ final class Audit {
 
     func touch() {
         modifiedDate = .now
-    }
-
-    private func countFindings(withSeverity severity: Severity) -> Int {
-        screens.reduce(0) { $0 + $1.findings.filter { $0.severity == severity }.count }
     }
 }
 
